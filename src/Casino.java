@@ -1,4 +1,3 @@
-import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -52,8 +51,8 @@ public class Casino {
             flipCoin();
 
             //Place cards into player LinkedList
-            card.linkedListShuff(playerOne);
-            card.linkedListShuff(playerTwo);
+            card.linkedListStuff(playerOne);
+            card.linkedListStuff(playerTwo);
 
             //Place the number of cards in the ints
             placePlayerCardSizeArray(2, 0, String.valueOf(playerOne.getPlayerLinked().size()));

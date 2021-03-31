@@ -26,7 +26,7 @@ public class Card{
     private int numOFHappyCards = 0;
 
     //Places cards into players LinkedList instead of arrays!
-    public void linkedListShuff(Player player){
+    public void linkedListStuff(Player player){
         for(int i = 0; i < NUMBER_OF_CARDS/2; i++)
             player.getPlayerLinked().addLast(getLinkCard());
     }
@@ -61,7 +61,7 @@ public class Card{
         }
 
         //Reruns it if the conditions don't meet
-        //Gotta practice recusion somewhere ;/
+        //Gotta practice recursion somewhere ;/
         return getLinkCard();
     }
 
