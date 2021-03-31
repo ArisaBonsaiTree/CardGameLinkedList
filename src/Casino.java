@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -27,6 +28,13 @@ public class Casino {
         //LinkedList for the table --> stack
         private SinglyLinkedList tableList = new SinglyLinkedList<String>();
 
+        private String playerOneCard;
+        private String playerTwoCard;
+        private String buffer;
+
+        private int currentRound = 1;
+        private int cardCount = 0;
+
         //Constructor to set the objects and start the game
         public Casino(Card card, Player playerOne, Player playerTwo){
             this.card = card;
@@ -34,6 +42,7 @@ public class Casino {
             this.playerTwo = playerTwo;
             setGame();
             playGame();
+            declareWinner();
         }
 
         //Place [0000] in the 2D array, cards in player linked list, and get the size of the player list
@@ -47,134 +56,105 @@ public class Casino {
             card.linkedListShuff(playerTwo);
 
             //Place the number of cards in the ints
-            playerNumberOneCard = playerOne.getPlayerLinked().size();
-            playerNumberTwoCard = playerTwo.getPlayerLinked().size();
+            placePlayerCardSizeArray(2, 0, String.valueOf(playerOne.getPlayerLinked().size()));
+            placePlayerCardSizeArray(0, 4, String.valueOf(playerTwo.getPlayerLinked().size()));
         }
 
         private void playGame(){
-
-            String playerTwoCard = null;
-            String playerOneCard = null;
-            int currentRound = 1;
-            int cardCount = 0;
-            //Since .size isnt working as planned...
-
-            // || playerOne.getPlayerDeck().size() == Card.getNumberOfCards()
-            //            || playerTwo.getPlayerDeck().size() == Card.getNumberOfCards()|| !playerTwo.getPlayerDeck().isEmpty()
-            //            ||!playerOne.getPlayerDeck().isEmpty())
             //Int to String String.valueOF
             //String to Int Integer.parseInt
-            setTwoDArray(2, 0, String.valueOf(playerNumberOneCard));
-            setTwoDArray(0, 4, String.valueOf(playerNumberTwoCard));
 
-
+            //TODO Swap turn when a player wins
             while(currentRound <= MAX_ROUNDS){
                 System.out.println();
                 System.out.println("\t\tRound: " + currentRound);
-                printArray();
+                printTable();
 
                 //Add the first card of player one into the table list
-                tableList.addFirst(playerOne.getPlayerLinked().removeFirst());
-                cardCount++;
-                //Declares what card was placed
-                System.out.println();
-                System.out.println("\tPlayer ONE placed " + tableList.first());
-                setTwoDArray(1,1, (String) tableList.first(), 0);
-                playerNumberOneCard -= 1;
-                setTwoDArray(2, 0, String.valueOf(playerNumberOneCard));
-                printArray();
-
-                //Place into a String so we can compare with another one
-                playerOneCard = (String) tableList.first();
+                playerRemoveFirstAndPlaceCardOnTable(playerOne, 1,1,2,0, playerOneCard, "PlayerOne");
+                printTable();
 
                 //Checks to see if playerOne card is equal to playerTwo
                 if(playerOneCard.equals(playerTwoCard)){
-                    System.out.println("PLAYER ONE HAS A MATCHING CARD");
-                    for(int i = 0; i < cardCount; i++){
-                        playerOne.getPlayerLinked().addLast((String) tableList.first());
-                        tableList.removeFirst();
-                    }
-                    playerTwoCard = "TWONULL";
-                    playerOneCard = "ONENULL";
-                    currentRound++;
-
-                    playerNumberOneCard += cardCount;
-                    setTwoDArray(2, 0, String.valueOf(playerNumberOneCard));
-                    cardCount = 0;
-
-                    emptyPlace(1,1);
-                    emptyPlace(1,2);
-
-                    System.out.println("NEXT ROUND");
-
-                    System.out.println("============================");
-                    System.out.println("============================");
-                    System.out.println("============================");
-                    System.out.println("\nType anything to move on to the next round");
-                    String buffer = scanner.nextLine();
+                    addCardsToWinner("Player One", playerOne);
                     continue;
                 }
 
-                tableList.addFirst(playerTwo.getPlayerLinked().removeFirst());
-                cardCount++;
-
-                System.out.println();
-                System.out.println("\tPlayer TWO placed " + tableList.first());
-                setTwoDArray(1,2, (String) tableList.first(), 0);
-                playerNumberTwoCard--;
-                setTwoDArray(0, 4,  Integer.toString(playerNumberTwoCard));
-                printArray();
-                playerTwoCard = (String) tableList.first();
+                playerRemoveFirstAndPlaceCardOnTable(playerTwo, 1,2,0,4, playerTwoCard, "NPC");
+                printTable();
 
                 if(playerTwoCard.equals(playerOneCard)){
-                    System.out.println("PLAYER TWO HAS A MATCHING CARD");
-                    for(int i = 0; i < cardCount; i++){
-                        playerTwo.getPlayerLinked().addLast((String) tableList.first());
-                        tableList.removeFirst();
-                    }
-                    playerTwoCard = "TWONULL";
-                    playerOneCard = "ONENULL";
-                    currentRound++;
-                    playerNumberTwoCard += cardCount;
-                    cardCount = 0;
-                    //System.out.print("Current stack ");
-                    //tableList.printList();
-
-                    setTwoDArray(0, 4, String.valueOf(playerNumberTwoCard));
-                    emptyPlace(1,1);
-                    emptyPlace(1,2);
-                    System.out.println("NEXT ROUND");
-
-                    System.out.println("============================");
-                    System.out.println("============================");
-                    System.out.println("============================");
-                    System.out.println("\nType anything to move on to the next round");
-                    String buffer = scanner.nextLine();
+                    addCardsToWinner("NPC", playerTwo);
                     continue;
-                    }
+                }
 
-                System.out.print("Current stack ");
-
+                //Print the current stack of cards
+                System.out.print("Current stack: ");
                 tableList.printList();
 
-                System.out.println("\nEND OF ROUND " + currentRound);
+                //Add some cool deco
+                System.out.println("\n\tEND OF ROUND " + currentRound);
                 System.out.println("============================");
                 System.out.println("============================");
                 System.out.println("============================");
                 currentRound++;
                 System.out.println("\nType anything to move on to the next round");
-                String buffer = scanner.nextLine();
+                buffer = scanner.nextLine();
             }
 
-            //The checkers can go here
-            if(playerNumberOneCard> playerNumberTwoCard){
-                System.out.println("Player ONE WINS!");
-            }else if(playerNumberOneCard < playerNumberTwoCard){
-                System.out.println("Player TWO WINS!");
-            }
-            else
-                System.out.println("TIE");
         }
+
+    private void playerRemoveFirstAndPlaceCardOnTable(Player player, int tableRow, int tableCol, int playRow, int playCol, String cardData, String playerName) {
+        tableList.addFirst(player.getPlayerLinked().removeFirst());
+        cardCount++;
+        //Declares what card was placed
+        System.out.println();
+        System.out.println("\tPlayer" + playerName + " placed " + tableList.first());
+        placeTableCard(tableRow,tableCol, (String) tableList.first(), 0);
+        placePlayerCardSizeArray(playRow, playCol, String.valueOf(player.getPlayerLinked().size()));
+        if(player.equals(playerOne))
+            playerOneCard = (String) tableList.first();
+        else if(player.equals(playerTwo))
+            playerTwoCard = (String) tableList.first();
+    }
+
+    private void addCardsToWinner(String whoWon,Player player) {
+        System.out.println("PLAYER " + whoWon + " HAS A MATCHING CARD");
+
+        for(int i = 0; i < cardCount; i++){
+            player.getPlayerLinked().addLast((String) tableList.first());
+            tableList.removeFirst();
+        }
+
+        playerTwoCard = "TWONULL";
+        playerOneCard = "ONENULL";
+
+        currentRound++;
+
+        placePlayerCardSizeArray(2, 0, String.valueOf(player.getPlayerLinked().size()));
+
+        emptyPlace(1,1);
+        emptyPlace(1,2);
+
+        System.out.println("NEXT ROUND");
+
+        System.out.println("============================");
+        System.out.println(whoWon + " won this round! Plus " + cardCount + " cards");
+        cardCount = 0;
+        System.out.println("============================");
+        System.out.println("\nType anything to move on to the next round");
+        buffer = scanner.nextLine();
+    }
+
+    private void declareWinner() {
+        if(playerOne.getPlayerLinked().size() > playerTwo.getPlayerLinked().size()){
+            System.out.println("Player ONE WINS!");
+        }else if(playerOne.getPlayerLinked().size() < playerTwo.getPlayerLinked().size()){
+            System.out.println("Player TWO WINS!");
+        }
+        else
+            System.out.println("TIE");
+    }
 
     //Ask user for heads/tails and decide who goes first --> Doesnt affect the game yet
     private void flipCoin() {
@@ -199,33 +179,40 @@ public class Casino {
 
     }
 
+    //When given location it will 'zero out' that location --> Good for clearing the table after a winner
     private void emptyPlace(int row, int col){
             twoDArray[row][col] = "[0000]";
         }
-        private void setTwoDArray(int row, int col, String data){
-            twoDArray[row][col] = "[00" + data + "]";
-        }
 
-        private void setTwoDArray(int row, int col, String data, int random){
-            twoDArray[row][col] = "[" + data + "]";
-        }
-
-        private void printArray(){
-            for (int i = 0; i < row; i++){
-                for(int j = 0; j < col; j++){
-                    System.out.print(twoDArray[i][j] + "\t");
-                }
-                System.out.println();
-            }
-        }
-
-        private void fillWithZero() {
-            for (int i = 0; i < row; i++) {
-                for (int j = 0; j < col; j++) {
-                    twoDArray[i][j] = "[0000]";
-                }
-            }
-        }
-
+    //Places a two digit value into the array uniformly
+    //Needed since ints don't have '00' 26 --> Need to hard code the 00
+    private void placePlayerCardSizeArray(int row, int col, String data){
+        twoDArray[row][col] = "[00" + data + "]";
     }
+
+    //Place a 4 length data correctly
+    private void placeTableCard(int row, int col, String data, int random){
+        twoDArray[row][col] = "[" + data + "]";
+    }
+
+    //Print the map for our viewing pleasure
+    private void printTable(){
+        for (int i = 0; i < row; i++){
+            for(int j = 0; j < col; j++){
+                System.out.print(twoDArray[i][j] + "\t");
+            }
+            System.out.println();
+        }
+    }
+
+    //Fill the entire 2D array with zero's
+    private void fillWithZero() {
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                twoDArray[i][j] = "[0000]";
+            }
+        }
+    }
+
+}
 
